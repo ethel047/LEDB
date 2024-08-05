@@ -2,7 +2,7 @@ import requests
 import os, json
 # 從環境變數讀取 API_URL 和 Headers
 API_URL = os.getenv('API_URL')
-HEADERS_JSON = os.getenv('HEADERS_JSON')
+HEADERS_JSON = os.getenv('Headers')
 Headers = json.loads(HEADERS_JSON)
 
 def call_prediction_api(question):
