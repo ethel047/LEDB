@@ -91,19 +91,19 @@ def read_excel_to_dict(file_path):
         
         for name, group in grouped:
             result[name] = {
-                '請假日期': group['請假日期'].tolist(),  # 将所有的請假日期放入列表中
-                '請假理由': group['請假理由'].tolist()   # 将所有的請假理由放入列表中
+                '請假日期': group['請假日期'].tolist(),  # 將所有的請假日期放入列表中
+                '請假理由': group['請假理由'].tolist()   # 將所有的請假理由放入列表中
             }
         
         return result
     except Exception as e:
-        print(f"讀取 Excel 文件時出错: {e}")
+        print(f"讀取 Excel 文件時出錯: {e}")
         return {}
     
 def save_overtime_requests_to_excel(user_id, user_name, today):
     try:
         
-        save_directory = os.path.expanduser("D:\\LEDB_0801")
+        save_directory = os.path.expanduser("/mnt/data")
         if not os.path.exists(save_directory):
             os.makedirs(save_directory)
         excel_filename = os.path.join(save_directory, f'{today}_加班名單.xlsx')

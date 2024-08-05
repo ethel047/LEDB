@@ -3,7 +3,6 @@ from linebot import LineBotApi, WebhookHandler
 from linebot.exceptions import InvalidSignatureError
 from linebot.models import MessageEvent, TextMessage as TextMessageContent, TextSendMessage as TextMessage
 
-from config import ACCESS_TOKEN, WEBHOOK_SECRET
 from api_handler import call_prediction_api
 from sheets_handler import check_today_entry, update_google_sheet
 from leave_overtime import leave_talking, work_overtime
@@ -12,10 +11,12 @@ from record_bell import record_bell
 import threading
 from datetime import datetime
 import time
+import os
 import schedule
 
 app = Flask(__name__)
-
+ACCESS_TOKEN = os.getenv('ACCESS_TOKEN')
+WEBHOOK_SECRET = os.getenv('WEBHOOK_SECRET')
 line_bot_api = LineBotApi(ACCESS_TOKEN)
 handler = WebhookHandler(WEBHOOK_SECRET)
 
@@ -84,7 +85,6 @@ def handle_message(event):
 
     if group_id == "C169b23c827c28e4c5d3c7ddbfb5aa6b9":
         return
-        print(f"Group ID: {group_id}")
 
     user_id = event.source.user_id
     text = event.message.text

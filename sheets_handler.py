@@ -1,10 +1,13 @@
-import pygsheets
+import pygsheets ,os
 from datetime import datetime
-from config import SERVICE_FILE, SPREADSHEET_ID
+# from config import SERVICE_FILE, SPREADSHEET_ID
 from linebot.models import TextSendMessage
 
-gc = pygsheets.authorize(service_file=SERVICE_FILE)
-sht = gc.open_by_key(SPREADSHEET_ID)
+# 認證 Google Sheets API
+gc = pygsheets.authorize(service_file='/etc/secrets/key.json')  # /etc/secrets 是 Render 預設的 secret file 路徑
+
+# 開啟指定的 Google Sheet
+sht = gc.open_by_key(os.getenv('SPREADSHEET_ID'))
 
 worksheet_mapping = {
     # "U02c370807baaf7ae3f6064d7705a8638": '筮修工作紀錄表',
