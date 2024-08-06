@@ -1,7 +1,12 @@
-import pygsheets ,os
+import logging
+import pygsheets
+import os
 from datetime import datetime
-# from config import SERVICE_FILE, SPREADSHEET_ID
 from linebot.models import TextSendMessage
+
+# 設定日誌記錄
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 # 認證 Google Sheets API
 gc = pygsheets.authorize(service_file='/etc/secrets/key.json')  # /etc/secrets 是 Render 預設的 secret file 路徑
@@ -69,15 +74,15 @@ def is_valid_date(date_string, date_format="%Y/%m/%d"):
     except ValueError:
         return False
 
-def update_google_sheet(line_bot_api,user_id, user_state, additional, msg, message):
-    print("User_state1",user_state.get(user_id))
+def update_google_sheet(line_bot_api, user_id, user_state, additional, msg, message):
+    logger.info("User_state1: %s", user_state.get(user_id))
     sheet_name = worksheet_mapping.get(user_id)
     if not sheet_name:
         return "找不到對應的工作表"
 
     wks = sht.worksheet_by_title(sheet_name)
     today = datetime.today().strftime("%Y/%m/%d")
-    print("開始判斷",additional)
+    logger.info("開始判斷: %s", additional)
     if '工作日期' not in user_state.get(user_id, {}):
         col_data = wks.get_col(content_mapping['工作日期'], include_tailing_empty=False)
         last_non_empty_row_index = find_last_non_empty_row_index(col_data)
@@ -116,10 +121,10 @@ def update_google_sheet(line_bot_api,user_id, user_state, additional, msg, messa
     elif message == "有":
         additional = True
         return f"請問你要補充？ 1. 心得 2. 任務來源 3. 交接/合作對象 4. 資料來源 5. 資料存放位置"
-    elif additional == True: 
+    elif additional == True:
         col_data = wks.get_col(content_mapping['工作時數'], include_tailing_empty=False)
         last_non_empty_row_index = find_last_non_empty_row_index(col_data)  
-        print("msg", msg)
+        logger.info("msg: %s", msg)
         if "1" in message or "心得" in message:
             msg = 1
             return "請輸入你的心得"
@@ -158,10 +163,10 @@ def update_google_sheet(line_bot_api,user_id, user_state, additional, msg, messa
             return "請問你今天還有任何需要補充的嗎？"
         additional = False
         msg = 0
-    print(user_state)
+
+    logger.info(user_state)
     sheet_name = worksheet_mapping.get(user_id)
     result_str = "\n ".join([f"{key}: {value}" for key, value in user_state[user_id].items()])
-    line_bot_api.push_message('C169b23c827c28e4c5d3c7ddbfb5aa6b9', TextSendMessage(text=f'{sheet_name} \n {result_str}')) #群組id
+    line_bot_api.push_message('C169b23c827c28e4c5d3c7ddbfb5aa6b9', TextSendMessage(text=f'{sheet_name} \n {result_str}'))  # 群組id
     user_state.pop(user_id, None)
-    # print(user_state)
     return "所有紀錄已完成，謝謝！"
