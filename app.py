@@ -13,6 +13,10 @@ from datetime import datetime
 import time
 import os
 import schedule
+import logging
+# 設定日誌記錄
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
 ACCESS_TOKEN = os.getenv('ACCESS_TOKEN')
@@ -54,7 +58,7 @@ KEYWORDS = {
 def callback():
     signature = request.headers.get('X-Line-Signature')
     body = request.get_data(as_text=True)
-    # print("Request body: " + body)
+    logger.info("Request body: %s", body)
 
     try:
         handler.handle(body, signature)
@@ -67,7 +71,7 @@ def callback():
 # 啟動催紀錄排程線程
 def schedule_jobs():
     schedule.every().day.at("21:30").do(lambda:record_bell(line_bot_api))
-    print('start')
+    logger.info('Scheduler started')
     while True:
         schedule.run_pending()
         time.sleep(60)  # 每分鐘檢查一次排程
