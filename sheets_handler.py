@@ -124,46 +124,48 @@ def update_google_sheet(line_bot_api, user_id, user_state, message):
         return f"請問你要補充？ 1. 心得 2. 任務來源 3. 交接/合作對象 4. 資料來源 5. 資料存放位置"
     elif user_state.get(user_id, {}).get('additional', False) == True:
         col_data = wks.get_col(content_mapping['工作時數'], include_tailing_empty=False)
-        last_non_empty_row_index = find_last_non_empty_row_index(col_data)  
+        last_non_empty_row_index = find_last_non_empty_row_index(col_data)
+        msg = user_state.setdefault(user_id, {}).get('msg', 0)
         logger.info("msg: %s", msg)
+        
         if "1" in message or "心得" in message:
-            msg = 1
+            user_state[user_id]['msg'] = 1
             return "請輸入你的心得"
-        if '心得' not in user_state.get(user_id, {}) and msg == 1:
+        if '心得' not in user_state.get(user_id, {}) and user_state[user_id]['msg'] == 1:
             wks.update_value((last_non_empty_row_index, content_mapping['心得']), message)
             user_state.setdefault(user_id, {})['心得'] = message
             return "請問你今天還有任何需要補充的嗎？"
         if "2" in message or "任務來源" in message:
-            msg = 2
+            user_state[user_id]['msg'] = 2
             return "請輸入你的任務來源"
-        if '任務來源' not in user_state.get(user_id, {}) and msg == 2:
+        if '任務來源' not in user_state.get(user_id, {}) and user_state[user_id]['msg'] == 2:
             wks.update_value((last_non_empty_row_index, content_mapping['任務來源']), message)
             user_state.setdefault(user_id, {})['任務來源'] = message
             return "請問你今天還有任何需要補充的嗎？"
         if "3" in message or "交接/合作對象" in message:
-            msg = 3
+            user_state[user_id]['msg'] = 3
             return "請輸入你的交接/合作對象"
-        if '交接/合作對象' not in user_state.get(user_id, {}) and msg == 3:
+        if '交接/合作對象' not in user_state.get(user_id, {}) and user_state[user_id]['msg'] == 3:
             wks.update_value((last_non_empty_row_index, content_mapping['交接/合作對象']), message)
             user_state.setdefault(user_id, {})['交接/合作對象'] = message
             return "請問你今天還有任何需要補充的嗎？"
 
         if "4" in message or "資料來源" in message:
-            msg = 4
+            user_state[user_id]['msg'] = 4
             return "請輸入你的資料來源"
         if '資料來源' not in user_state.get(user_id, {}) and msg == 4:
             wks.update_value((last_non_empty_row_index, content_mapping['資料來源']), message)
             user_state.setdefault(user_id, {})['資料來源'] = message
             return "請問你今天還有任何需要補充的嗎？"
         if "5" in message or "資料存放位置" in message:
-            msg = 5
+            user_state[user_id]['msg'] = 5
             return "請問你今天還有任何需要補充的嗎？"
         if '資料存放位置' not in user_state.get(user_id, {}) and msg == 5:
             wks.update_value((last_non_empty_row_index+1, content_mapping['資料存放位置']), message)
             user_state.setdefault(user_id, {})['資料存放位置'] = message
             return "請問你今天還有任何需要補充的嗎？"
-        additional = False
-        msg = 0
+        user_state[user_id]['additional'] = False
+        user_state[user_id]['msg'] = 0
 
     logger.info(user_state)
     # sheet_name = worksheet_mapping.get(user_id)
