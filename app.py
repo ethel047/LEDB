@@ -113,9 +113,9 @@ def handle_message(event):
             if check_today_entry(user_id):
                 response_message = "今天的工作已經填寫過了! 修改請至 https://docs.google.com/spreadsheets/d/1wFM0u_7YxVSURxSEq0BcIc9cNVYgRCQJhq619u93VBk/edit?gid=1003752271#gid=1003752271。"
             else:
-                response_message = update_google_sheet(line_bot_api,user_id, user_state, additional, msg, text)
+                response_message = update_google_sheet(line_bot_api,user_id, user_state, text)
         else:
-            response_message = update_google_sheet(line_bot_api,user_id, user_state, additional, msg, text)
+            response_message = update_google_sheet(line_bot_api,user_id, user_state, text)
     
     elif user_id in id_mapping.values():
         user_name = next(key for key, value in id_mapping.items() if value == user_id)
