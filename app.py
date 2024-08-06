@@ -102,7 +102,7 @@ def handle_message(event):
         return
     # 檢查訊息中的名字
 
-    name_in_text = id_mapping.get(text, None)
+    name_in_text = next((name for name in id_mapping if name == text), None)
     # print("u_s",user_state.get(user_id))
     # 如果名字存在且ID不匹配，回應"請不要輸入別人的名稱"
     if name_in_text and id_mapping[name_in_text] != user_id:
