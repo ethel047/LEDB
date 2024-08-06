@@ -11,7 +11,7 @@ sht = gc.open_by_key(os.getenv('SPREADSHEET_ID'))
 
 worksheet_mapping = {
     # "U02c370807baaf7ae3f6064d7705a8638": '筮修工作紀錄表',
-    # "U1afd46e95a1eac5a28fbf9fb889a8d5e": '姵蓁工作紀錄表',
+    "U1afd46e95a1eac5a28fbf9fb889a8d5e": '姵蓁工作紀錄表',
     # "U33bccf9dadb498e7d31b5a4cea9ae297": '政憲工作紀錄表',
     "U864716975bfc7e1c5b93975470810bcc": '致嘉工作紀錄表',
     "U0de51624c010c4a2ec439e10fbd67b1f": '玟君工作紀錄表',
