@@ -128,21 +128,21 @@ def update_google_sheet(line_bot_api, user_id, user_state, message):
         msg = user_state.setdefault(user_id, {}).get('msg', 0)
         logger.info("msg: %s", msg)
         
-        if "1" in message or "心得" in message:
+        if "1" == message or "心得" == message:
             user_state[user_id]['msg'] = 1
             return "請輸入你的心得"
         if '心得' not in user_state.get(user_id, {}) and user_state[user_id]['msg'] == 1:
             wks.update_value((last_non_empty_row_index, content_mapping['心得']), message)
             user_state.setdefault(user_id, {})['心得'] = message
             return "請問你今天還有任何需要補充的嗎？"
-        if "2" in message or "任務來源" in message:
+        if "2" == message or "任務來源" == message:
             user_state[user_id]['msg'] = 2
             return "請輸入你的任務來源"
         if '任務來源' not in user_state.get(user_id, {}) and user_state[user_id]['msg'] == 2:
             wks.update_value((last_non_empty_row_index, content_mapping['任務來源']), message)
             user_state.setdefault(user_id, {})['任務來源'] = message
             return "請問你今天還有任何需要補充的嗎？"
-        if "3" in message or "交接/合作對象" in message:
+        if "3" == message or "交接/合作對象" == message:
             user_state[user_id]['msg'] = 3
             return "請輸入你的交接/合作對象"
         if '交接/合作對象' not in user_state.get(user_id, {}) and user_state[user_id]['msg'] == 3:
@@ -150,14 +150,14 @@ def update_google_sheet(line_bot_api, user_id, user_state, message):
             user_state.setdefault(user_id, {})['交接/合作對象'] = message
             return "請問你今天還有任何需要補充的嗎？"
 
-        if "4" in message or "資料來源" in message:
+        if "4" == message or "資料來源" == message:
             user_state[user_id]['msg'] = 4
             return "請輸入你的資料來源"
         if '資料來源' not in user_state.get(user_id, {}) and msg == 4:
             wks.update_value((last_non_empty_row_index, content_mapping['資料來源']), message)
             user_state.setdefault(user_id, {})['資料來源'] = message
             return "請問你今天還有任何需要補充的嗎？"
-        if "5" in message or "資料存放位置" in message:
+        if "5" == message or "資料存放位置" == message:
             user_state[user_id]['msg'] = 5
             return "請輸入你的資料存放位置"
         if '資料存放位置' not in user_state.get(user_id, {}) and msg == 5:
