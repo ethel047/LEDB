@@ -168,8 +168,8 @@ def update_google_sheet(line_bot_api, user_id, user_state, message):
         user_state[user_id]['msg'] = 0
 
     logger.info(user_state)
-    # sheet_name = worksheet_mapping.get(user_id)
-    # result_str = "\n ".join([f"{key}: {value}" for key, value in user_state[user_id].items()])
-    # line_bot_api.push_message('C169b23c827c28e4c5d3c7ddbfb5aa6b9', TextSendMessage(text=f'{sheet_name} \n {result_str}'))  # 群組id
+    sheet_name = worksheet_mapping.get(user_id)
+    result_str = "\n ".join([f"{key}: {value}" for key, value in user_state[user_id].items()])
+    line_bot_api.push_message('C169b23c827c28e4c5d3c7ddbfb5aa6b9', TextSendMessage(text=f'{sheet_name} \n {result_str}'))  # 群組id
     user_state.pop(user_id, None)
     return "所有紀錄已完成，謝謝！"
