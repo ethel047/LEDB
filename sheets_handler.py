@@ -159,9 +159,9 @@ def update_google_sheet(line_bot_api, user_id, user_state, message):
             return "請問你今天還有任何需要補充的嗎？"
         if "5" in message or "資料存放位置" in message:
             user_state[user_id]['msg'] = 5
-            return "請問你今天還有任何需要補充的嗎？"
+            return "請輸入你的資料存放位置"
         if '資料存放位置' not in user_state.get(user_id, {}) and msg == 5:
-            wks.update_value((last_non_empty_row_index+1, content_mapping['資料存放位置']), message)
+            wks.update_value((last_non_empty_row_index, content_mapping['資料存放位置']), message)
             user_state.setdefault(user_id, {})['資料存放位置'] = message
             return "請問你今天還有任何需要補充的嗎？"
         user_state[user_id]['additional'] = False
