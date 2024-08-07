@@ -21,7 +21,7 @@ def leave_talking(leave_requests,line_bot_api, user_id, message, user_name):
         if '請假日期' not in leave_requests.get(user_id, {}) :
             print('date input')
             leave_requests.setdefault(user_name, {})['請假日期'] = message
-            pattern = r'^\d{2}-\d{2}$'
+            pattern = r'^\d{2}/\d{2}$'
             print(message)
             leave_date = leave_requests.get(user_name, {}).get('請假日期', '未提供理由')
 
