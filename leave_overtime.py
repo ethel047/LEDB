@@ -42,7 +42,7 @@ def leave_talking(leave_requests,line_bot_api, user_id, message, user_name):
                     else:
                         state = 2
                         print(start_date, end_date)
-                        file_leave = read_excel_to_dict(f"D:\\LEDB_0801\\{leave_date}_請假單.xlsx")
+                        file_leave = read_excel_to_dict(f"/mnt/data/{leave_date}_請假單.xlsx")
                         print(file_leave)
                         if user_name not in file_leave:
                             state = 3
@@ -64,7 +64,7 @@ def leave_talking(leave_requests,line_bot_api, user_id, message, user_name):
             else:
                 state = 2
                 print(leave_date)
-                file_leave = read_excel_to_dict(f"D:\\LEDB_0801\\{leave_date}_請假單.xlsx")
+                file_leave = read_excel_to_dict(f"/mnt/data/{leave_date}_請假單.xlsx")
                 print(file_leave)
 
                 if user_name not in file_leave:

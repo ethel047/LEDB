@@ -4,7 +4,7 @@ import pandas as pd
 
 def save_leave_requests_to_excel(leave_requests, leave_date):
     try:
-        save_directory = os.path.expanduser("D:\\LEDB_0801")
+        save_directory = os.path.expanduser("/mnt/data")
         if not os.path.exists(save_directory):
             os.makedirs(save_directory)
         current_year = datetime.now().year
