@@ -120,13 +120,13 @@ def update_google_sheet(line_bot_api, user_id, user_state, message):
         return f"請問你今天還有任何需要補充的嗎？"
     elif message == "有":
         user_state.setdefault(user_id, {})['additional'] = True
-        logger.info("additional: %s", user_state[user_id]['additional'])
+        # logger.info("additional: %s", user_state[user_id]['additional'])
         return f"請問你要補充？ 1. 心得 2. 任務來源 3. 交接/合作對象 4. 資料來源 5. 資料存放位置"
     elif user_state.get(user_id, {}).get('additional', False) == True:
         col_data = wks.get_col(content_mapping['工作時數'], include_tailing_empty=False)
         last_non_empty_row_index = find_last_non_empty_row_index(col_data)
         msg = user_state.setdefault(user_id, {}).get('msg', 0)
-        logger.info("msg: %s", msg)
+        # logger.info("msg: %s", msg)
         
         if "1" == message or "心得" == message:
             user_state[user_id]['msg'] = 1
@@ -169,7 +169,13 @@ def update_google_sheet(line_bot_api, user_id, user_state, message):
 
     logger.info(user_state)
     sheet_name = worksheet_mapping.get(user_id)
-    result_str = "\n ".join([f"{key}: {value}" for key, value in user_state[user_id].items()])
+    
+    # 過濾掉 'additional' 和 'msg'
+    filtered_user_state = {key: value for key, value in user_state[user_id].items() if key not in ['additional', 'msg']}
+    # 將過濾後的結果轉換為字串
+    result_str = "\n ".join([f"{key}: {value}" for key, value in filtered_user_state.items()])
+    # 推送訊息
     line_bot_api.push_message('C169b23c827c28e4c5d3c7ddbfb5aa6b9', TextSendMessage(text=f'{sheet_name} \n {result_str}'))  # 群組id
+
     user_state.pop(user_id, None)
     return "所有紀錄已完成，謝謝！"
