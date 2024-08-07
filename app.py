@@ -51,8 +51,8 @@ KEYWORDS = {
     "我要上傳工作紀錄!": " ",
     "我想要問問題!": " ",
     "我要SeaDeep的密碼!":" ",
-    "我要NAS的密碼!":" ",
-    "我要請假!":" "
+    "我要NAS的密碼!":" "
+    # "我要請假!":" "
 }
 @app.route("/callback", methods=['POST'])
 def callback():
