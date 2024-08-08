@@ -7,16 +7,21 @@ from datetime import datetime
 from sheets_handler import check_today_entry
 
 
-today = datetime.now().strftime('%Y-%m-%d')   
+today = datetime.now().strftime('%Y/%m/%d')   
 def record_bell(line_bot_api):
     try:
-        leave_person=read_excel_to_dict(f"/mnt/data/{today}_請假單.xlsx")
-        overtime_person=read_excel_to_dict(f"/mnt/data/{today}_加班名單.xlsx")
+        file_leave=read_excel_to_dict(f"/mnt/data/All_請假單.xlsx")
+        # leave_date=[datetime.strptime(date, '%m/%d') for date in file_leave[user_name]['請假日期']] #已經請的
+        file_overtime=read_excel_to_dict(f"/mnt/data/All_加班名單.xlsx")
+        # overtime_date=[datetime.strptime(date, '%m/%d') for date in file_leave[user_name]['請假日期']] #已經請的
+
         # print(overtime_person.get('姓名', []))
         for user_name in id_mapping:
             # if leave_person or overtime_person:
-            if user_name not in leave_person:
-                if user_name not in overtime_person :
+            overtime_date=[datetime.strptime(date, '%m/%d') for date in file_leave[user_name]['請假日期']] #已經請的
+            leave_date=[datetime.strptime(date, '%m/%d') for date in file_leave[user_name]['請假日期']] #已經請的
+            if today not in leave_date:
+                if today not in overtime_date :
                     print('check start')
                     user_id = id_mapping.get(user_name, "該名字沒有對應的用戶ID")
                     if check_today_entry(user_id) == False:

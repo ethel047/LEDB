@@ -1,7 +1,7 @@
 import os
 from datetime import datetime, timedelta
 import pandas as pd
-
+from leave_overtime import generate_date_range
 def save_leave_requests_to_excel(leave_requests, leave_date):
     try:
         save_directory = os.path.expanduser("/mnt/data")
@@ -9,33 +9,36 @@ def save_leave_requests_to_excel(leave_requests, leave_date):
             os.makedirs(save_directory)
         current_year = datetime.now().year
         # 格式化请假日期
-
+        leave_records = []
         if '～' in leave_date:
 # 解析 start date 和 end date
             start_date_str, end_date_str = leave_date.split('～')
-            start_date = datetime.strptime(start_date_str.strip(), "%m/%d")
-            end_date = datetime.strptime(end_date_str.strip(), "%m/%d")
-            # 生成日期列表
-            current_date = start_date
-            while current_date <= end_date:
-                print(current_date.strftime("%m-%d"))  # 打印 MM/DD 格式的日期
-                formatted_leave_date = datetime.strptime(f"{current_year}-{current_date}", "%Y-%m-%d").strftime("%Y-%m-%d")
-                excel_filename = os.path.join(save_directory, f'{formatted_leave_date}_請假單.xlsx')
+            start_date = datetime.strptime(f"{current_year}/{start_date_str.strip()}", "%Y/%m/%d")
+            end_date = datetime.strptime(f"{current_year}/{end_date_str.strip()}", "%Y/%m/%d")
+            date_list = generate_date_range(start_date, end_date) 
+            excel_filename2 = os.path.join(save_directory, f'All請假單.xlsx')
+            # 将 formatted_leave_date 更新到 leave_requests 字典中
+            for user, details in leave_requests.items():
+                reason = details.get('請假原因', '')
+                for date in date_list:
+                    leave_records.append({'姓名': user, '請假日期': date, '請假理由': reason})
+            df_combined = pd.DataFrame(leave_records)
+            if os.path.exists(excel_filename2): #(ALL)
+                df_existing = pd.read_excel(excel_filename2, index_col=0)
+                df_combined = pd.concat([df_existing,df_combined])
+            else:
+                df_combined = pd.DataFrame.from_dict(leave_requests, orient='index')
+            df_combined.to_excel(excel_filename2, index_label='姓名')
+            print(f"已保存請假信息到 {excel_filename2}")
+        else:
+            try:
+                formatted_leave_date = datetime.strptime(f"{current_year}-{leave_date}", "%Y/%m/%d").strftime("%Y/%m/%d")
+            except ValueError:
+                formatted_leave_date = datetime.strptime(leave_date, "%Y/%m/%d").strftime("%Y/%m/%d")
                 excel_filename2 = os.path.join(save_directory, f'All請假單.xlsx')
                 # 将 formatted_leave_date 更新到 leave_requests 字典中
                 for user in leave_requests:
                     leave_requests[user]['請假日期'] = formatted_leave_date
-
-                # 如果文件存在，讀取現有數據
-                if os.path.exists(excel_filename): #(seperate)
-                    df_existing = pd.read_excel(excel_filename, index_col=0)
-                    df_new = pd.DataFrame.from_dict(leave_requests, orient='index')
-                    df_combined = pd.concat([df_existing, df_new])
-                else:
-                    df_combined = pd.DataFrame.from_dict(leave_requests, orient='index')
-                # 將合併後的數據寫入
-                df_combined.to_excel(excel_filename, index_label='姓名')
-                print(f"已保存請假信息到 {excel_filename}")
 
                 if os.path.exists(excel_filename2): #(ALL)
                     df_existing = pd.read_excel(excel_filename2, index_col=0)
@@ -45,39 +48,6 @@ def save_leave_requests_to_excel(leave_requests, leave_date):
                     df_combined = pd.DataFrame.from_dict(leave_requests, orient='index')
                 df_combined.to_excel(excel_filename2, index_label='姓名')
                 print(f"已保存請假信息到 {excel_filename2}")
-                current_date += timedelta(days=1)
-        # else:
-        try:
-            formatted_leave_date = datetime.strptime(f"{current_year}-{leave_date}", "%Y-%m-%d").strftime("%Y-%m-%d")
-        except ValueError:
-            formatted_leave_date = datetime.strptime(leave_date, "%Y-%m-%d").strftime("%Y-%m-%d")
-
-            excel_filename = os.path.join(save_directory, f'{formatted_leave_date}_請假單.xlsx')
-            excel_filename2 = os.path.join(save_directory, f'All請假單.xlsx')
-            # 将 formatted_leave_date 更新到 leave_requests 字典中
-            for user in leave_requests:
-                leave_requests[user]['請假日期'] = formatted_leave_date
-
-            # 如果文件存在，讀取現有數據
-            if os.path.exists(excel_filename): #(seperate)
-                df_existing = pd.read_excel(excel_filename, index_col=0)
-                df_new = pd.DataFrame.from_dict(leave_requests, orient='index')
-                df_combined = pd.concat([df_existing, df_new])
-            else:
-                df_combined = pd.DataFrame.from_dict(leave_requests, orient='index')
-            # 將合併後的數據寫入
-            df_combined.to_excel(excel_filename, index_label='姓名')
-            print(f"已保存請假信息到 {excel_filename}")
-
-            if os.path.exists(excel_filename2): #(ALL)
-                df_existing = pd.read_excel(excel_filename2, index_col=0)
-                df_new = pd.DataFrame.from_dict(leave_requests, orient='index')
-                df_combined = pd.concat([df_existing, df_new])
-            else:
-                df_combined = pd.DataFrame.from_dict(leave_requests, orient='index')
-            df_combined.to_excel(excel_filename2, index_label='姓名')
-            print(f"已保存請假信息到 {excel_filename2}")
-
     except Exception as e:
         print(f"保存 Excel 文件時出错: {e}")
 
@@ -106,12 +76,11 @@ def save_overtime_requests_to_excel(user_id, user_name, today):
         save_directory = os.path.expanduser("/mnt/data")
         if not os.path.exists(save_directory):
             os.makedirs(save_directory)
-        excel_filename = os.path.join(save_directory, f'{today}_加班名單.xlsx')
-        df_new = pd.DataFrame({'姓名': [user_name]})
+        excel_filename = os.path.join(save_directory, f'All_加班名單.xlsx')
+        df_new = pd.DataFrame({'姓名': [user_name], '加班日期': [today]})
         if os.path.exists(excel_filename):
             df_existing = pd.read_excel(excel_filename)
-            if '姓名' in df_existing.columns:
-                df_existing = df_existing[['姓名']]  # 保留「姓名」列
+            if '姓名' in df_existing.columns and '加班日期' in df_existing.columns:
                 # 刪除第一行並合併新數據
                 df_existing = df_existing.iloc[1:]  # 刪除第一行
                 df_combined = pd.concat([df_existing, df_new], ignore_index=True)

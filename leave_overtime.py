@@ -47,7 +47,7 @@ def leave_talking(leave_requests,line_bot_api, user_id, message, user_name):
                         leave_dates=generate_date_range(start_date, end_date) #現在正要請的
 
                         file_leave = read_excel_to_dict(f"/mnt/data/All_請假單.xlsx")
-                        existing_leave_dates = [datetime.strptime(date, '%m/%d') for date in file_leave[user_name]['請假日期']]
+                        existing_leave_dates = [datetime.strptime(date, '%m/%d') for date in file_leave[user_name]['請假日期']] #已經請的
                         
                         print(file_leave)
                         for date in leave_dates:
@@ -71,10 +71,11 @@ def leave_talking(leave_requests,line_bot_api, user_id, message, user_name):
             else:
                 state = 2
                 print(leave_date)
-                file_leave = read_excel_to_dict(f"/mnt/data/{leave_date}_請假單.xlsx")
+                file_leave = read_excel_to_dict(f"/mnt/data/All_請假單.xlsx")
                 print(file_leave)
+                existing_leave_dates = [datetime.strptime(date, '%m/%d') for date in file_leave[user_name]['請假日期']] #已經請的
 
-                if user_name not in file_leave:
+                if leave_date not in existing_leave_dates:
                     state = 3
                     # print(leave_requests)
                     return f"好的{user_name}，請問你的請假理由"
@@ -108,6 +109,7 @@ def leave_talking(leave_requests,line_bot_api, user_id, message, user_name):
 def generate_date_range(start_date, end_date):
     date_list = []
     current_date = start_date
+    
     while current_date <= end_date:
         date_list.append(current_date)
         current_date += timedelta(days=1)
@@ -115,7 +117,7 @@ def generate_date_range(start_date, end_date):
 
 def work_overtime(user_id,message, user_name):
     if "我要加班!" in message:
-        today = datetime.now().strftime('%Y-%m-%d')
+        today = datetime.now().strftime('%Y/%m/%d')
         save_overtime_requests_to_excel(user_id, user_name, today)
  
         return f"今天({today}) {user_name}加班"
