@@ -10,6 +10,7 @@ from record_bell import record_bell
 
 import threading
 from datetime import datetime
+import pytz
 import time
 import os
 import schedule
@@ -70,7 +71,8 @@ def callback():
 
 # 啟動催紀錄排程線程
 def schedule_jobs():
-    schedule.every().day.at("21:30").do(lambda:record_bell(line_bot_api))
+    taipei = pytz.timezone('Asia/Taipei')
+    schedule.every().day.at("21:30").do(lambda:record_bell(line_bot_api, taipei))
     logger.info('Scheduler started')
     while True:
         schedule.run_pending()

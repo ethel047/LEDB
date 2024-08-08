@@ -16,7 +16,7 @@ sht = gc.open_by_key(os.getenv('SPREADSHEET_ID'))
 
 worksheet_mapping = {
     # "U02c370807baaf7ae3f6064d7705a8638": '筮修工作紀錄表',
-    "U1afd46e95a1eac5a28fbf9fb889a8d5e": '姵蓁工作紀錄表',
+    # "U1afd46e95a1eac5a28fbf9fb889a8d5e": '姵蓁工作紀錄表',
     # "U33bccf9dadb498e7d31b5a4cea9ae297": '政憲工作紀錄表',
     "U864716975bfc7e1c5b93975470810bcc": '致嘉工作紀錄表',
     "U0de51624c010c4a2ec439e10fbd67b1f": '玟君工作紀錄表',
@@ -168,8 +168,8 @@ def update_google_sheet(line_bot_api, user_id, user_state, message):
         user_state[user_id]['msg'] = 0
 
     logger.info(user_state)
-    # sheet_name = worksheet_mapping.get(user_id)
-    # result_str = "\n ".join([f"{key}: {value}" for key, value in user_state[user_id].items()])
-    # line_bot_api.push_message('C169b23c827c28e4c5d3c7ddbfb5aa6b9', TextSendMessage(text=f'{sheet_name} \n {result_str}'))  # 群組id
+    sheet_name = worksheet_mapping.get(user_id)
+    result_str = "\n ".join([f"{key}: {value}" for key, value in user_state[user_id].items()])
+    line_bot_api.push_message('C169b23c827c28e4c5d3c7ddbfb5aa6b9', TextSendMessage(text=f'{sheet_name} \n {result_str}'))  # 群組id
     user_state.pop(user_id, None)
     return "所有紀錄已完成，謝謝！"
