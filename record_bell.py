@@ -26,10 +26,10 @@ def record_bell(line_bot_api):
                     user_id = id_mapping.get(user_name, "該名字沒有對應的用戶ID")
                     if check_today_entry(user_id) == False:
                         print(user_name)
-                        line_bot_api.push_message('C169b23c827c28e4c5d3c7ddbfb5aa6b9', TextSendMessage(text=f'{user_name}，尚未填紀錄')) #群組id
+                        # line_bot_api.push_message('C169b23c827c28e4c5d3c7ddbfb5aa6b9', TextSendMessage(text=f'{user_name}，尚未填紀錄')) #群組id
                         print("自動訊息發送成功")
-            else:
-                    line_bot_api.push_message('C169b23c827c28e4c5d3c7ddbfb5aa6b9', TextSendMessage(text=f'大家都填完了很棒喔')) #群組id
+            # else:
+                    # line_bot_api.push_message('C169b23c827c28e4c5d3c7ddbfb5aa6b9', TextSendMessage(text=f'大家都填完了很棒喔')) #群組id
           
     except Exception as e:
         print(f"發送訊息時出錯: {e}")
