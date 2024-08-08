@@ -19,7 +19,7 @@ def record_bell(line_bot_api):
         for user_name in id_mapping:
             # if leave_person or overtime_person:
             overtime_date=[datetime.strptime(date, '%m/%d') for date in file_leave[user_name]['請假日期']] #已經請的
-            leave_date=[datetime.strptime(date, '%m/%d') for date in file_leave[user_name]['請假日期']] #已經請的
+            leave_date=[datetime.strptime(date, '%m/%d') for date in file_overtime[user_name]['加班日期']] #已經請的
             if today not in leave_date:
                 if today not in overtime_date :
                     print('check start')
