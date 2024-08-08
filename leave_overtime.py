@@ -47,8 +47,11 @@ def leave_talking(leave_requests,line_bot_api, user_id, message, user_name):
                         leave_dates=generate_date_range(start_date, end_date) #現在正要請的
 
                         file_leave = read_excel_to_dict(f"/mnt/data/All_請假單.xlsx")
-                        existing_leave_dates = [datetime.strptime(date, '%m/%d') for date in file_leave[user_name]['請假日期']] #已經請的
-                        
+                        # existing_leave_dates = [datetime.strptime(date, '%m/%d') for date in file_leave[user_name]['請假日期']] #已經請的
+                        if user_name in file_leave and '請假日期' in file_leave[user_name]:
+                            existing_leave_dates = [datetime.strptime(date, '%m/%d') for date in file_leave[user_name]['請假日期']]
+                        else:
+                            existing_leave_dates=None
                         print(file_leave)
                         for date in leave_dates:
                             if date not in existing_leave_dates:
