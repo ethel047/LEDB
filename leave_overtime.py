@@ -48,7 +48,7 @@ def leave_talking(leave_requests,line_bot_api, user_id, message, user_name):
 
                         file_leave = read_excel_to_dict(f"/mnt/data/All_請假單.xlsx")
                         # existing_leave_dates = [datetime.strptime(date, '%m/%d') for date in file_leave[user_name]['請假日期']] #已經請的
-                        if user_name in file_leave and '請假日期' in file_leave[user_name]:
+                        if existing_leave_dates is None or leave_date not in existing_leave_dates:# 执行某些操作
                             existing_leave_dates = [datetime.strptime(date, '%m/%d') for date in file_leave[user_name]['請假日期']]
                         else:
                             existing_leave_dates=None
@@ -76,9 +76,11 @@ def leave_talking(leave_requests,line_bot_api, user_id, message, user_name):
                 print(leave_date)
                 file_leave = read_excel_to_dict(f"/mnt/data/All_請假單.xlsx")
                 print(file_leave)
-                existing_leave_dates = [datetime.strptime(date, '%m/%d') for date in file_leave[user_name]['請假日期']] #已經請的
-
-                if leave_date not in existing_leave_dates:
+                if user_name in file_leave and '請假日期' in file_leave[user_name]:
+                    existing_leave_dates = [datetime.strptime(date, '%m/%d') for date in file_leave[user_name]['請假日期']]
+                else:
+                    existing_leave_dates=None                    
+                if existing_leave_dates is None or leave_date not in existing_leave_dates:# 执行某些操作
                     state = 3
                     # print(leave_requests)
                     return f"好的{user_name}，請問你的請假理由"
