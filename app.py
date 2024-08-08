@@ -71,8 +71,7 @@ def callback():
 
 # 啟動催紀錄排程線程
 def schedule_jobs():
-    taipei = pytz.timezone('Asia/Taipei')
-    schedule.every().day.at("21:30").do(lambda:record_bell(line_bot_api, taipei))
+    schedule.every().day.at("15:00").do(lambda:record_bell(line_bot_api))
     logger.info('Scheduler started')
     while True:
         schedule.run_pending()
