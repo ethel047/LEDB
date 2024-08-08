@@ -28,8 +28,8 @@ user_state = {}
 additional = False
 msg = 0
 
-leave_requests={}
 
+leave_requests={}
 id_mapping = {
     "筮修": 'U02c370807baaf7ae3f6064d7705a8638',
     "姵蓁": 'U1afd46e95a1eac5a28fbf9fb889a8d5e',
@@ -62,19 +62,26 @@ def callback():
 
     try:
         handler.handle(body, signature)
+        t = threading.Thread(target=handler.handle, args=(body, signature))
+        t.start()
+        t.join()  # 等待執行緒完成
     except InvalidSignatureError:
+        logger.error("Invalid signature. Please check your channel access token/channel secret.")
         print("Invalid signature. Please check your channel access token/channel secret.")
         abort(400)
 
     return 'OK'
 
+today = datetime.now().strftime('%Y, %m, %d')
 # 啟動催紀錄排程線程
 def schedule_jobs():
     schedule.every().day.at("21:30").do(lambda:record_bell(line_bot_api))
     logger.info('Scheduler started')
-    while True:
-        schedule.run_pending()
-        time.sleep(60)  # 每分鐘檢查一次排程
+    if datetime.date(today).weekday() != 2 and datetime.date(today).weekday() != 3 and datetime.date(today).weekday() != 4 :
+        while True:
+            schedule.run_pending()
+            time.sleep(60)  # 每分鐘檢查一次排程
+    
 schedule_thread = threading.Thread(target=schedule_jobs)
 schedule_thread.daemon = True
 schedule_thread.start()
@@ -131,3 +138,4 @@ def handle_message(event):
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=5000)
+    

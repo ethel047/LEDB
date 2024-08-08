@@ -3,7 +3,7 @@ import pygsheets
 import os
 from datetime import datetime
 from linebot.models import TextSendMessage
-
+import threading
 # 設定日誌記錄
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -13,6 +13,9 @@ gc = pygsheets.authorize(service_file='/etc/secrets/key.json')  # /etc/secrets �
 
 # 開啟指定的 Google Sheet
 sht = gc.open_by_key(os.getenv('SPREADSHEET_ID'))
+
+# 定義共享資源的鎖
+lock = threading.Lock()
 
 worksheet_mapping = {
     # "U02c370807baaf7ae3f6064d7705a8638": '筮修工作紀錄表',
@@ -75,101 +78,102 @@ def is_valid_date(date_string, date_format="%Y/%m/%d"):
         return False
 
 def update_google_sheet(line_bot_api, user_id, user_state, message):
-    logger.info("User_state1: %s", user_state.get(user_id))
-    sheet_name = worksheet_mapping.get(user_id)
-    if not sheet_name:
-        return "找不到對應的工作表"
+    with lock:
+        logger.info("User_state1: %s", user_state.get(user_id))
+        sheet_name = worksheet_mapping.get(user_id)
+        if not sheet_name:
+            return "找不到對應的工作表"
 
-    wks = sht.worksheet_by_title(sheet_name)
-    today = datetime.today().strftime("%Y/%m/%d")
+        wks = sht.worksheet_by_title(sheet_name)
+        today = datetime.today().strftime("%Y/%m/%d")
 
-    if '工作日期' not in user_state.get(user_id, {}):
-        col_data = wks.get_col(content_mapping['工作日期'], include_tailing_empty=False)
-        last_non_empty_row_index = find_last_non_empty_row_index(col_data)
+        if '工作日期' not in user_state.get(user_id, {}):
+            col_data = wks.get_col(content_mapping['工作日期'], include_tailing_empty=False)
+            last_non_empty_row_index = find_last_non_empty_row_index(col_data)
 
-        wks.update_value((last_non_empty_row_index+1, content_mapping['工作日期']), today)
-        user_state.setdefault(user_id, {})['工作日期'] = today
-        return f"請問你今天的工作時數"
-    elif '工作時數' not in user_state.get(user_id, {}):
-        col_data = wks.get_col(content_mapping['工作時數'], include_tailing_empty=False)
-        last_non_empty_row_index = find_last_non_empty_row_index(col_data)
+            wks.update_value((last_non_empty_row_index+1, content_mapping['工作日期']), today)
+            user_state.setdefault(user_id, {})['工作日期'] = today
+            return f"請問你今天的工作時數"
+        elif '工作時數' not in user_state.get(user_id, {}):
+            col_data = wks.get_col(content_mapping['工作時數'], include_tailing_empty=False)
+            last_non_empty_row_index = find_last_non_empty_row_index(col_data)
 
-        wks.update_value((last_non_empty_row_index+1, content_mapping['工作時數']), message)
-        user_state.setdefault(user_id, {})['工作時數'] = message
-        return f"請問你今天的工作內容(標題)"
-    elif '工作內容' not in user_state.get(user_id, {}):
-        col_data = wks.get_col(content_mapping['工作內容'], include_tailing_empty=False)
-        last_non_empty_row_index = find_last_non_empty_row_index(col_data)
+            wks.update_value((last_non_empty_row_index+1, content_mapping['工作時數']), message)
+            user_state.setdefault(user_id, {})['工作時數'] = message
+            return f"請問你今天的工作內容(標題)"
+        elif '工作內容' not in user_state.get(user_id, {}):
+            col_data = wks.get_col(content_mapping['工作內容'], include_tailing_empty=False)
+            last_non_empty_row_index = find_last_non_empty_row_index(col_data)
 
-        wks.update_value((last_non_empty_row_index+1, content_mapping['工作內容']), message)
-        user_state.setdefault(user_id, {})['工作內容'] = message
-        return f"請問你今天的完成度"
-    elif '完成度' not in user_state.get(user_id, {}):
-        col_data = wks.get_col(content_mapping['完成度'], include_tailing_empty=False)
-        last_non_empty_row_index = find_last_non_empty_row_index(col_data)
+            wks.update_value((last_non_empty_row_index+1, content_mapping['工作內容']), message)
+            user_state.setdefault(user_id, {})['工作內容'] = message
+            return f"請問你今天的完成度"
+        elif '完成度' not in user_state.get(user_id, {}):
+            col_data = wks.get_col(content_mapping['完成度'], include_tailing_empty=False)
+            last_non_empty_row_index = find_last_non_empty_row_index(col_data)
 
-        wks.update_value((last_non_empty_row_index+1, content_mapping['完成度']), message)
-        user_state.setdefault(user_id, {})['完成度'] = message
-        return f"請問你今天的工作內容(細節)"
-    elif '工作內容細節' not in user_state.get(user_id, {}):
-        col_data = wks.get_col(content_mapping['工作內容細節'], include_tailing_empty=False)
-        last_non_empty_row_index = find_last_non_empty_row_index(col_data)
+            wks.update_value((last_non_empty_row_index+1, content_mapping['完成度']), message)
+            user_state.setdefault(user_id, {})['完成度'] = message
+            return f"請問你今天的工作內容(細節)"
+        elif '工作內容細節' not in user_state.get(user_id, {}):
+            col_data = wks.get_col(content_mapping['工作內容細節'], include_tailing_empty=False)
+            last_non_empty_row_index = find_last_non_empty_row_index(col_data)
 
-        wks.update_value((last_non_empty_row_index+1, content_mapping['工作內容細節']), message)
-        user_state.setdefault(user_id, {})['工作內容細節'] = message
-        return f"請問你今天還有任何需要補充的嗎？"
-    elif message == "有":
-        user_state.setdefault(user_id, {})['additional'] = True
-        logger.info("additional: %s", user_state[user_id]['additional'])
-        return f"請問你要補充？ 1. 心得 2. 任務來源 3. 交接/合作對象 4. 資料來源 5. 資料存放位置"
-    elif user_state.get(user_id, {}).get('additional', False) == True:
-        col_data = wks.get_col(content_mapping['工作時數'], include_tailing_empty=False)
-        last_non_empty_row_index = find_last_non_empty_row_index(col_data)
-        msg = user_state.setdefault(user_id, {}).get('msg', 0)
-        logger.info("msg: %s", msg)
-        
-        if "1" == message or "心得" == message:
-            user_state[user_id]['msg'] = 1
-            return "請輸入你的心得"
-        if '心得' not in user_state.get(user_id, {}) and user_state[user_id]['msg'] == 1:
-            wks.update_value((last_non_empty_row_index, content_mapping['心得']), message)
-            user_state.setdefault(user_id, {})['心得'] = message
-            return "請問你今天還有任何需要補充的嗎？"
-        if "2" == message or "任務來源" == message:
-            user_state[user_id]['msg'] = 2
-            return "請輸入你的任務來源"
-        if '任務來源' not in user_state.get(user_id, {}) and user_state[user_id]['msg'] == 2:
-            wks.update_value((last_non_empty_row_index, content_mapping['任務來源']), message)
-            user_state.setdefault(user_id, {})['任務來源'] = message
-            return "請問你今天還有任何需要補充的嗎？"
-        if "3" == message or "交接/合作對象" == message:
-            user_state[user_id]['msg'] = 3
-            return "請輸入你的交接/合作對象"
-        if '交接/合作對象' not in user_state.get(user_id, {}) and user_state[user_id]['msg'] == 3:
-            wks.update_value((last_non_empty_row_index, content_mapping['交接/合作對象']), message)
-            user_state.setdefault(user_id, {})['交接/合作對象'] = message
-            return "請問你今天還有任何需要補充的嗎？"
+            wks.update_value((last_non_empty_row_index+1, content_mapping['工作內容細節']), message)
+            user_state.setdefault(user_id, {})['工作內容細節'] = message
+            return f"請問你今天還有任何需要補充的嗎？"
+        elif message == "有":
+            user_state.setdefault(user_id, {})['additional'] = True
+            logger.info("additional: %s", user_state[user_id]['additional'])
+            return f"請問你要補充？ 1. 心得 2. 任務來源 3. 交接/合作對象 4. 資料來源 5. 資料存放位置"
+        elif user_state.get(user_id, {}).get('additional', False) == True:
+            col_data = wks.get_col(content_mapping['工作時數'], include_tailing_empty=False)
+            last_non_empty_row_index = find_last_non_empty_row_index(col_data)
+            msg = user_state.setdefault(user_id, {}).get('msg', 0)
+            logger.info("msg: %s", msg)
+            
+            if "1" == message or "心得" == message:
+                user_state[user_id]['msg'] = 1
+                return "請輸入你的心得"
+            if '心得' not in user_state.get(user_id, {}) and user_state[user_id]['msg'] == 1:
+                wks.update_value((last_non_empty_row_index, content_mapping['心得']), message)
+                user_state.setdefault(user_id, {})['心得'] = message
+                return "請問你今天還有任何需要補充的嗎？"
+            if "2" == message or "任務來源" == message:
+                user_state[user_id]['msg'] = 2
+                return "請輸入你的任務來源"
+            if '任務來源' not in user_state.get(user_id, {}) and user_state[user_id]['msg'] == 2:
+                wks.update_value((last_non_empty_row_index, content_mapping['任務來源']), message)
+                user_state.setdefault(user_id, {})['任務來源'] = message
+                return "請問你今天還有任何需要補充的嗎？"
+            if "3" == message or "交接/合作對象" == message:
+                user_state[user_id]['msg'] = 3
+                return "請輸入你的交接/合作對象"
+            if '交接/合作對象' not in user_state.get(user_id, {}) and user_state[user_id]['msg'] == 3:
+                wks.update_value((last_non_empty_row_index, content_mapping['交接/合作對象']), message)
+                user_state.setdefault(user_id, {})['交接/合作對象'] = message
+                return "請問你今天還有任何需要補充的嗎？"
 
-        if "4" == message or "資料來源" == message:
-            user_state[user_id]['msg'] = 4
-            return "請輸入你的資料來源"
-        if '資料來源' not in user_state.get(user_id, {}) and msg == 4:
-            wks.update_value((last_non_empty_row_index, content_mapping['資料來源']), message)
-            user_state.setdefault(user_id, {})['資料來源'] = message
-            return "請問你今天還有任何需要補充的嗎？"
-        if "5" == message or "資料存放位置" == message:
-            user_state[user_id]['msg'] = 5
-            return "請輸入你的資料存放位置"
-        if '資料存放位置' not in user_state.get(user_id, {}) and msg == 5:
-            wks.update_value((last_non_empty_row_index, content_mapping['資料存放位置']), message)
-            user_state.setdefault(user_id, {})['資料存放位置'] = message
-            return "請問你今天還有任何需要補充的嗎？"
-        user_state[user_id]['additional'] = False
-        user_state[user_id]['msg'] = 0
+            if "4" == message or "資料來源" == message:
+                user_state[user_id]['msg'] = 4
+                return "請輸入你的資料來源"
+            if '資料來源' not in user_state.get(user_id, {}) and msg == 4:
+                wks.update_value((last_non_empty_row_index, content_mapping['資料來源']), message)
+                user_state.setdefault(user_id, {})['資料來源'] = message
+                return "請問你今天還有任何需要補充的嗎？"
+            if "5" == message or "資料存放位置" == message:
+                user_state[user_id]['msg'] = 5
+                return "請輸入你的資料存放位置"
+            if '資料存放位置' not in user_state.get(user_id, {}) and msg == 5:
+                wks.update_value((last_non_empty_row_index, content_mapping['資料存放位置']), message)
+                user_state.setdefault(user_id, {})['資料存放位置'] = message
+                return "請問你今天還有任何需要補充的嗎？"
+            user_state[user_id]['additional'] = False
+            user_state[user_id]['msg'] = 0
 
-    logger.info(user_state)
-    # sheet_name = worksheet_mapping.get(user_id)
-    # result_str = "\n ".join([f"{key}: {value}" for key, value in user_state[user_id].items()])
-    # line_bot_api.push_message('C169b23c827c28e4c5d3c7ddbfb5aa6b9', TextSendMessage(text=f'{sheet_name} \n {result_str}'))  # 群組id
-    user_state.pop(user_id, None)
-    return "所有紀錄已完成，謝謝！"
+        logger.info(user_state)
+        # sheet_name = worksheet_mapping.get(user_id)
+        # result_str = "\n ".join([f"{key}: {value}" for key, value in user_state[user_id].items()])
+        # line_bot_api.push_message('C169b23c827c28e4c5d3c7ddbfb5aa6b9', TextSendMessage(text=f'{sheet_name} \n {result_str}'))  # 群組id
+        user_state.pop(user_id, None)
+        return "所有紀錄已完成，謝謝！"
