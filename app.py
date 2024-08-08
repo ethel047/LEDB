@@ -52,7 +52,7 @@ KEYWORDS = {
     "我想要問問題!": " ",
     "我要SeaDeep的密碼!":" ",
     "我要NAS的密碼!":" ",
-    "我要請假!":" "
+    # "我要請假!":" "
 }
 @app.route("/callback", methods=['POST'])
 def callback():
@@ -120,8 +120,8 @@ def handle_message(event):
     elif user_id in id_mapping.values():
         user_name = next(key for key, value in id_mapping.items() if value == user_id)
         response_message=work_overtime(user_id,text,user_name)
-        # if response_message is None:
-        #     response_message=leave_talking(leave_requests,line_bot_api, user_id, text, user_name)
+        if response_message is None:
+            response_message=leave_talking(leave_requests,line_bot_api, user_id, text, user_name)
         if response_message is None:
             response_message = call_prediction_api(text)
     
