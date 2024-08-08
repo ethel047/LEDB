@@ -1,4 +1,4 @@
-from excel_w_r import read_excel_to_dict,save_leave_requests_to_excel, save_overtime_requests_to_excel
+from excel_w_r import read_excel_to_dict,save_leave_requests_to_excel, save_overtime_requests_to_excel, generate_date_range
 from linebot.models import TextSendMessage
 # from app import line_bot_api,leave_requests
 import re
@@ -106,14 +106,7 @@ def leave_talking(leave_requests,line_bot_api, user_id, message, user_name):
     # print(state)
     # return "無法識別的請求"
 
-def generate_date_range(start_date, end_date):
-    date_list = []
-    current_date = start_date
-    
-    while current_date <= end_date:
-        date_list.append(current_date)
-        current_date += timedelta(days=1)
-    return date_list
+
 
 def work_overtime(user_id,message, user_name):
     if "我要加班!" in message:

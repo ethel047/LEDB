@@ -1,7 +1,16 @@
 import os
 from datetime import datetime, timedelta
 import pandas as pd
-from leave_overtime import generate_date_range
+
+def generate_date_range(start_date, end_date):
+    date_list = []
+    current_date = start_date
+    
+    while current_date <= end_date:
+        date_list.append(current_date)
+        current_date += timedelta(days=1)
+    return date_list
+
 def save_leave_requests_to_excel(leave_requests, leave_date):
     try:
         save_directory = os.path.expanduser("/mnt/data")
